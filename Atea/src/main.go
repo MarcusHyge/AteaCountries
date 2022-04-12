@@ -23,14 +23,6 @@ type MainData struct {
 	} `json:"data"`
 }
 
-func ConvertToJson(jsonData map[string]string) []byte {
-	body, err := json.Marshal(jsonData)
-	if err != nil {
-		panic(err)
-	}
-	return body
-}
-
 func GetCountriesByCurrency() bool {
 	// Make body
 	jsonData := map[string]string{
@@ -46,28 +38,40 @@ func GetCountriesByCurrency() bool {
         `,
 	}
 
-	//Make request
+	//Create a request with body
 	request := CreateRequest(jsonData)
+
+	//Make the request and gets the response back in a *http.Response
 	response := RequestData(request)
+
+	//Closing the body to prevent resource leak
 	defer response.Body.Close()
+
+	//Read the body
 	data := ReadResponseBody(response)
+
+	//Structure the data into MainData struct
 	result := JsonDataToStruct(data)
+
+	//Group the countries by name
 	hashMap := GroupCountriesByName(result)
+
+	//Print out the values of the hashMap
 	PrintOutValuesOfMap(hashMap)
 	return true
+}
+
+func ConvertToJson(jsonData map[string]string) []byte {
+	body, err := json.Marshal(jsonData)
+	if err != nil {
+		panic(err)
+	}
+	return body
 }
 
 func ReadResponseBody(response *http.Response) []byte {
 	data, _ := ioutil.ReadAll(response.Body)
 	return data
-}
-
-func JsonDataToStruct(data []byte) MainData {
-	var result MainData
-	if err := json.Unmarshal(data, &result); err != nil {
-		fmt.Errorf("Can not unmarshal JSON:", err.Error())
-	}
-	return result
 }
 
 func RequestData(request *http.Request) *http.Response {
@@ -87,6 +91,14 @@ func CreateRequest(jsonData map[string]string) *http.Request {
 	//Set content type
 	request.Header.Add("content-type", "application/json")
 	return request
+}
+
+func JsonDataToStruct(data []byte) MainData {
+	var result MainData
+	if err := json.Unmarshal(data, &result); err != nil {
+		fmt.Errorf("Can not unmarshal JSON:", err.Error())
+	}
+	return result
 }
 
 func GroupCountriesByName(result MainData) map[string][]string {
