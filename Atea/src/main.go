@@ -123,7 +123,7 @@ func groupCountriesByName(result Country) map[string][]string {
 
 func printOutValuesOfMap(hashMap map[string][]string) {
 	for key, element := range hashMap {
-		fmt.Println("Country:", key, "=>", "Languages:", element)
+		fmt.Println("Language:", key, "=>", "Countries:", element)
 	}
 }
 
