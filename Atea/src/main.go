@@ -9,10 +9,10 @@ import (
 	"net/http"
 )
 
-const apiurl = "https://countries.trevorblades.com/"
-const apimethod = http.MethodPost
+const APIURL = "https://countries.trevorblades.com/"
+const APIMETHOD = http.MethodPost
 
-type MainData struct {
+type Country struct {
 	Data struct {
 		Countries []struct {
 			Name      string `json:"name"`
@@ -39,29 +39,29 @@ func GetCountriesByCurrency() bool {
 	}
 
 	//Create a request with body
-	request := CreateRequest(jsonData)
+	request := createRequest(jsonData)
 
 	//Make the request and gets the response back in a *http.Response
-	response := RequestData(request)
+	response := requestData(request)
 
 	//Closing the body to prevent resource leak
 	defer response.Body.Close()
 
 	//Read the body
-	data := ReadResponseBody(response)
+	data := readResponseBody(response)
 
-	//Structure the data into MainData struct
-	result := JsonDataToStruct(data)
+	//Structure the data into Country struct
+	result := jsonDataToStruct(data)
 
 	//Group the countries by name
-	hashMap := GroupCountriesByName(result)
+	hashMap := groupCountriesByName(result)
 
 	//Print out the values of the hashMap
-	PrintOutValuesOfMap(hashMap)
+	printOutValuesOfMap(hashMap)
 	return true
 }
 
-func ConvertToJson(jsonData map[string]string) []byte {
+func convertToJson(jsonData map[string]string) []byte {
 	body, err := json.Marshal(jsonData)
 	if err != nil {
 		panic(err)
@@ -69,12 +69,12 @@ func ConvertToJson(jsonData map[string]string) []byte {
 	return body
 }
 
-func ReadResponseBody(response *http.Response) []byte {
+func readResponseBody(response *http.Response) []byte {
 	data, _ := ioutil.ReadAll(response.Body)
 	return data
 }
 
-func RequestData(request *http.Request) *http.Response {
+func requestData(request *http.Request) *http.Response {
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
@@ -83,8 +83,8 @@ func RequestData(request *http.Request) *http.Response {
 	return response
 }
 
-func CreateRequest(jsonData map[string]string) *http.Request {
-	request, err := http.NewRequest(http.MethodPost, apiurl, bytes.NewBuffer(ConvertToJson(jsonData)))
+func createRequest(jsonData map[string]string) *http.Request {
+	request, err := http.NewRequest(APIMETHOD, APIURL, bytes.NewBuffer(convertToJson(jsonData)))
 	if err != nil {
 		fmt.Errorf("Error creating new request: ", err.Error())
 	}
@@ -93,15 +93,15 @@ func CreateRequest(jsonData map[string]string) *http.Request {
 	return request
 }
 
-func JsonDataToStruct(data []byte) MainData {
-	var result MainData
+func jsonDataToStruct(data []byte) Country {
+	var result Country
 	if err := json.Unmarshal(data, &result); err != nil {
 		fmt.Errorf("Can not unmarshal JSON:", err.Error())
 	}
 	return result
 }
 
-func GroupCountriesByName(result MainData) map[string][]string {
+func groupCountriesByName(result Country) map[string][]string {
 	/*
 		Making map to group values.
 		Key Values = Languages
@@ -121,7 +121,7 @@ func GroupCountriesByName(result MainData) map[string][]string {
 	return hashMap
 }
 
-func PrintOutValuesOfMap(hashMap map[string][]string) {
+func printOutValuesOfMap(hashMap map[string][]string) {
 	for key, element := range hashMap {
 		fmt.Println("Country:", key, "=>", "Languages:", element)
 	}
